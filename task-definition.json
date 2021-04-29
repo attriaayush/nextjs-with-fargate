@@ -1,31 +1,28 @@
 {
-    "executionRoleArn": "arn:aws:iam::926552379113:role/ecsTaskExecutionRole",
-    "containerDefinitions": [
-        {
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/messing-with-fargate-task-def",
-                    "awslogs-region": "eu-west-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            },
-            "portMappings": [
-                {
-                    "hostPort": 3000,
-                    "protocol": "tcp",
-                    "containerPort": 3000
-                }
-            ],
-            "name": "nextjs-website"
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/messing-with-fargate-task-def",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "ecs"
         }
-    ],
-    "placementConstraints": [],
-    "memory": "512",
-    "family": "messing-with-fargate-task-def",
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "networkMode": "awsvpc",
-    "cpu": "256"
+      },
+      "portMappings": [
+        {
+          "hostPort": 3000,
+          "protocol": "tcp",
+          "containerPort": 3000
+        }
+      ],
+      "name": "nextjs-website"
+    }
+  ],
+  "placementConstraints": [],
+  "memory": "512",
+  "family": "messing-with-fargate-task-def",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256"
 }
