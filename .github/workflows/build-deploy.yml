@@ -48,5 +48,5 @@ jobs:
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: nextjs-website
-          cluster: messing-with-fargate
+          cluster: fargate-cluster
           wait-for-service-stability: false
