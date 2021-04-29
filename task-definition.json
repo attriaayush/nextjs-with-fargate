@@ -1,4 +1,5 @@
 {
+  "executionRoleArn": "arn:aws:iam::914257654531:role/role-name",
   "containerDefinitions": [
     {
       "logConfiguration": {
