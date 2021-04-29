@@ -1,11 +1,13 @@
 resource "aws_lb" "main" {
-  name               = "website-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = [aws_subnet.main.id]
-
+  name                       = "website-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = [aws_subnet.a.id, aws_subnet.b.id]
   enable_deletion_protection = false
+  depends_on = [
+    aws_internet_gateway.gw
+  ]
 }
 
 resource "aws_alb_target_group" "main" {

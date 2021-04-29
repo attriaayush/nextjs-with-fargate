@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 3.37"
     }
   }
 }
@@ -15,6 +15,11 @@ provider "aws" {
 # Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
 }
 
 resource "aws_ecs_cluster" "fargate_cluster" {
@@ -27,17 +32,13 @@ resource "aws_ecs_service" "nextjs_fargate" {
   name          = "nextjs-fargate"
   cluster       = aws_ecs_cluster.fargate_cluster.id
   desired_count = 1
-  iam_role      = aws_iam_role.ecs_task_execution_role.arn
 
+  deployment_controller {
+    type = "EXTERNAL"
+  }
   ordered_placement_strategy {
     type  = "binpack"
     field = "cpu"
-  }
-
-  load_balancer {
-    target_group_arn = aws_alb_target_group.main.arn
-    container_name   = "nextjs-website"
-    container_port   = 3000
   }
 
   placement_constraints {
