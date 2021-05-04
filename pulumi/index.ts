@@ -1,7 +1,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as awsx from "@pulumi/awsx";
+import * as aws from "@pulumi/aws";
 
-// Create a load balancer to listen for requests and route them to the container.
+const imageUrl = process.env.IMAGE_URL as string;
+
+const repository = new awsx.ecr.Repository("aattri");
+
 const listener = new awsx.elasticloadbalancingv2.NetworkListener("website-lb", {
   port: 80,
   targetGroup: {
@@ -14,7 +18,7 @@ const service = new awsx.ecs.FargateService("nextjs-website", {
   taskDefinitionArgs: {
     containers: {
       website: {
-        image: awsx.ecs.Image.fromPath("website", "../"),
+        image: imageUrl,
         memory: 512,
         portMappings: [listener],
       },

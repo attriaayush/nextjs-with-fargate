@@ -16,8 +16,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TIM }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TIM }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
 
       - name: Login to Amazon ECR
@@ -28,25 +28,21 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: timbotambo
+          ECR_REPOSITORY: aattri
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: nextjs-website
-          image: ${{ steps.build-image.outputs.image }}
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@v1
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      - uses: pulumi/actions@v3
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: nextjs-fargate
-          cluster: fargate-cluster
-          wait-for-service-stability: false
+          command: up
+          stack-name: test
+          work-dir: pulumi
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          IMAGE_URL: ${{ steps.build-image.outputs.image }}
