@@ -24,6 +24,7 @@ const service = new awsx.ecs.FargateService("nextjs-website", {
       },
     },
   },
+  waitForSteadyState: false,
 });
 
 export const frontendURL = pulumi.interpolate`http://${listener.endpoint.hostname}/`;
