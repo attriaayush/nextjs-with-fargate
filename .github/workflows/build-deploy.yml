@@ -40,6 +40,15 @@ jobs:
 
       - uses: pulumi/actions@v3
         with:
+          command: login --cloud-url s3://pulumi-state-bucket-2021
+          stack-name: test
+          work-dir: pulumi
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          IMAGE_URL: ${{ steps.build-image.outputs.image }}
+
+      - uses: pulumi/actions@v3
+        with:
           command: up
           stack-name: test
           work-dir: pulumi
