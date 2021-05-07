@@ -1,19 +1,38 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as awsx from "@pulumi/awsx";
-import * as aws from "@pulumi/aws";
 
 const imageUrl = process.env.IMAGE_URL as string;
 
-const repository = new awsx.ecr.Repository("aattri");
-
-const listener = new awsx.elasticloadbalancingv2.NetworkListener("website-lb", {
-  port: 80,
-  targetGroup: {
-    port: 3000,
-  },
+const vpc = new awsx.ec2.Vpc("main", {
+  cidrBlock: "10.0.0.0/16",
+  // subnets: [{ name: "a", type: "private" }],
 });
 
+const cluster = new awsx.ecs.Cluster("main", { vpc }, { dependsOn: vpc });
+
+const alb = new awsx.lb.ApplicationLoadBalancer("web-traffic", {
+  vpc,
+  securityGroups: cluster.securityGroups,
+});
+
+const repository = new awsx.ecr.Repository("aattri");
+
+const listener = alb.createListener(
+  "web-listener",
+  {
+    protocol: "HTTP",
+    port: 80,
+    targetGroup: {
+      protocol: "HTTP",
+      port: 3000,
+    },
+    vpc,
+  },
+  { dependsOn: vpc }
+);
+
 const service = new awsx.ecs.FargateService("nextjs-website", {
+  cluster,
   desiredCount: 1,
   taskDefinitionArgs: {
     containers: {
@@ -24,6 +43,7 @@ const service = new awsx.ecs.FargateService("nextjs-website", {
       },
     },
   },
+  subnets: vpc.privateSubnetIds,
   waitForSteadyState: false,
 });
 
